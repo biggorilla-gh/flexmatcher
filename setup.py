@@ -12,13 +12,15 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'pandas',
     'scipy',
-    'scikit-learn>=0.18'
+    'scikit-learn>=0.18',
+    'numpy'
 ]
 
 test_requirements = [
     'pandas',
     'scipy',
-    'scikit-learn>=0.18'
+    'scikit-learn>=0.18',
+    'numpy'
 ]
 
 setup(
