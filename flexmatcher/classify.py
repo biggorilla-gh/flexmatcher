@@ -79,10 +79,12 @@ class NGramClassifier(Classifier):
         # checking what type of vectorize to create
         if count:
             self.vectorizer = CountVectorizer(analyzer = analyzer,
-                                              ngram_range = ngram_range)
+                                              ngram_range = ngram_range,
+                                              max_features = 200)
         else:
             self.vectorizer = HashingVectorizer(analyzer = analyzer,
-                                                ngram_range = ngram_range)
+                                                ngram_range = ngram_range,
+                                                n_features = 200)
         self.features = self.vectorizer.fit_transform(values).toarray()
         # training the classifier
         self.gnb = GaussianNB()
@@ -146,15 +148,18 @@ class CharDistClassifier(Classifier):
         feat_df = data[['value']].copy()
         feat_df['length'] = feat_df['value'].apply(lambda val: len(val))
         feat_df['digit_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isdigit() for char in val) / len(val))
+            lambda val: 0 if len(val) == 0 else \
+            sum(char.isdigit() for char in val) / len(val))
         feat_df['digit_num'] = feat_df['value'].apply(
             lambda val: sum(char.isdigit() for char in val))
         feat_df['alpha_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isalpha() for char in val) / len(val))
+            lambda val: 0 if len(val) == 0 else \
+            sum(char.isalpha() for char in val) / len(val))
         feat_df['alpha_num'] = feat_df['value'].apply(
             lambda val: sum(char.isalpha() for char in val))
         feat_df['space_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isspace() for char in val) / len(val))
+            lambda val: 0 if len(val) == 0 else \
+            sum(char.isspace() for char in val) / len(val))
         feat_df['space_num'] = feat_df['value'].apply(
             lambda val: sum(char.isspace() for char in val))
         self.features = feat_df.ix[:,1:].as_matrix()
@@ -190,15 +195,18 @@ class CharDistClassifier(Classifier):
         feat_df = data[['value']].copy()
         feat_df['length'] = feat_df['value'].apply(lambda val: len(val))
         feat_df['digit_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isdigit() for char in val) / len(val))
+            lambda val: 0 if len(val) == 0 else \
+            sum(char.isdigit() for char in val) / len(val))
         feat_df['digit_num'] = feat_df['value'].apply(
             lambda val: sum(char.isdigit() for char in val))
         feat_df['alpha_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isalpha() for char in val) / len(val))
+            lambda val: 0 if len(val) == 0 else \
+            sum(char.isalpha() for char in val) / len(val))
         feat_df['alpha_num'] = feat_df['value'].apply(
             lambda val: sum(char.isalpha() for char in val))
         feat_df['space_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isspace() for char in val) / len(val))
+            lambda val: 0 if len(val) == 0 else \
+            sum(char.isspace() for char in val) / len(val))
         feat_df['space_num'] = feat_df['value'].apply(
             lambda val: sum(char.isspace() for char in val))
         features = feat_df.ix[:,1:].as_matrix()

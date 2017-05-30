@@ -45,7 +45,7 @@ class FlexMatcher:
     def __init__(self):
         pass
 
-    def create_training_data(self, dataframes, mappings, sample_size=100):
+    def create_training_data(self, dataframes, mappings, sample_size=200):
         """Transform dataframes and mappings into training data.
 
         The method uses the names of columns as well as the data under each
@@ -68,6 +68,14 @@ class FlexMatcher:
         self.training_data = training_data.fillna('NA')
         self.columns = \
             sorted(list(set.union(*[set(x.values()) for x in mappings])))
+        # removing columns that are not present in the dataframe
+        # TODO: this should change (It's not ideal to change problem definition
+        # without notifying the user)
+        available_columns = []
+        for (datafr, mapping) in zip(dataframes, mappings):
+                for c in datafr.columns:
+                    available_columns.append(mapping[c])
+        self.columns = sorted(list(set(available_columns)))
 
     def train(self):
         """Train each classifier and the meta-classifier."""
