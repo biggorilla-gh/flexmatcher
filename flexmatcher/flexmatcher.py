@@ -66,6 +66,9 @@ class FlexMatcher:
             training_data_list.append(sampled_data)
         training_data = pandas.concat(training_data_list, ignore_index=True)
         self.training_data = training_data.fillna('NA')
+        self.column_training_data = training_data.copy()
+        self.column_training_data['value'] = self.column_training_data['name']
+        self.column_training_data = self.column_training_data.drop('name', 1)
         self.columns = \
             sorted(list(set.union(*[set(x.values()) for x in mappings])))
         # removing columns that are not present in the dataframe
@@ -83,11 +86,16 @@ class FlexMatcher:
         biword_count_clf = clf.NGramClassifier(self.training_data,
                                                ngram_range=(2,2))
         char_count_clf = clf.NGramClassifier(self.training_data,
-                                             analyzer='char',
+                                             analyzer='char_wb',
                                              ngram_range=(3,6))
+        col_char_count_clf = clf.NGramClassifier(self.column_training_data,
+                                                 analyzer='char_wb',
+                                                 ngram_range=(4,6))
         char_dist_clf = clf.CharDistClassifier(self.training_data)
+        col_char_dist_clf = clf.CharDistClassifier(self.column_training_data)
         self.classifier_list = [word_count_clf, biword_count_clf,
-                                char_count_clf, char_dist_clf]
+                                char_count_clf, char_dist_clf,
+                                col_char_dist_clf, col_char_count_clf]
         self.prediction_list = \
             [x.predict_training() for x in self.classifier_list]
         self.train_meta_learner()
