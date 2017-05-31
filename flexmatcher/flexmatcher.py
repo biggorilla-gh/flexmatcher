@@ -17,7 +17,7 @@ import flexmatcher.classify as clf
 import flexmatcher.utils as utils
 from sklearn import linear_model
 import numpy as np
-import pandas
+import pandas as pd
 import warnings
 
 class FlexMatcher:
@@ -31,10 +31,16 @@ class FlexMatcher:
     mediated schema.
 
     Attributes:
-        training_data (dataframe): Dataframe where with 3 columns. The name of
+        training_data (dataframe): Dataframe with 3 columns. The name of
             the column in the schema, the value under that column and the name
             of the column in the mediated schema it was mapped to.
+        column_training_data (dataframe): Dataframe  with 2 columns. The name
+            the column in the schema and the name of the column in the mediated
+            schema it was mapped to.
+        data_src_num (int): Store the number of available data sources.
         classifier_list (list): List of classifiers used in the training.
+        classifier_type (string): List containing the type of each classifier.
+            Possible values are 'column' and 'value' classifiers.
         prediction_list (list): List of predictions on the training data
             produced by each classifier.
         weights (ndarray): A matrix where cell (i,j) captures how good the j-th
@@ -60,13 +66,14 @@ class FlexMatcher:
         training_data_list = []
         for (datafr, mapping) in zip(dataframes, mappings):
             sampled_rows = datafr.sample(min(sample_size, datafr.shape[0]))
-            sampled_data = pandas.melt(sampled_rows)
+            sampled_data = pd.melt(sampled_rows)
             sampled_data.columns = ['name', 'value']
             sampled_data['class'] = \
                 sampled_data.apply(lambda row: mapping[row['name']], axis=1)
             training_data_list.append(sampled_data)
-        training_data = pandas.concat(training_data_list, ignore_index=True)
+        training_data = pd.concat(training_data_list, ignore_index=True)
         self.training_data = training_data.fillna('NA')
+        self.data_src_num = len(dataframes)
         self.column_training_data = training_data.copy()
         self.column_training_data['value'] = self.column_training_data['name']
         self.column_training_data = self.column_training_data.drop('name', 1)
@@ -84,22 +91,27 @@ class FlexMatcher:
     def train(self):
         """Train each classifier and the meta-classifier."""
         word_count_clf = clf.NGramClassifier(self.training_data)
-        col_word_count_clf = clf.NGramClassifier(self.column_training_data,
-                                                 analyzer=utils.columnAnalyzer)
         biword_count_clf = clf.NGramClassifier(self.training_data,
                                                ngram_range=(2,2))
         char_count_clf = clf.NGramClassifier(self.training_data,
                                              analyzer='char_wb',
-                                             ngram_range=(3,6))
-        col_char_count_clf = clf.NGramClassifier(self.column_training_data,
-                                                 analyzer='char_wb',
-                                                 ngram_range=(4,6))
+                                             ngram_range=(1,6))
         char_dist_clf = clf.CharDistClassifier(self.training_data)
-        col_char_dist_clf = clf.CharDistClassifier(self.column_training_data)
         self.classifier_list = [word_count_clf, biword_count_clf,
-                                char_count_clf, char_dist_clf,
-                                col_char_dist_clf, col_char_count_clf,
-                                col_word_count_clf]
+                                char_count_clf, char_dist_clf]
+        self.classifier_type = ['value', 'value',
+                                'value', 'value']
+        if self.data_src_num > 5:
+            col_char_dist_clf = clf.CharDistClassifier(self.column_training_data)
+            col_word_count_clf = clf.NGramClassifier(self.column_training_data,
+                                                    analyzer=utils.columnAnalyzer)
+            col_char_count_clf = clf.NGramClassifier(self.column_training_data,
+                                                    analyzer='char_wb',
+                                                    ngram_range=(4,6))
+            self.classifier_list = self.classifier_list + [col_char_dist_clf,
+                                                           col_char_count_clf,
+                                                           col_word_count_clf]
+            self.classifier_type = self.classifier_type + (['column'] * 3)
         self.prediction_list = \
             [x.predict_training() for x in self.classifier_list]
         self.train_meta_learner()
@@ -126,7 +138,8 @@ class FlexMatcher:
                 regression_data['classifer' + str(classifier_ind)] = \
                     prediction[:,class_ind]
             # setting up the linear regression
-            stacker = linear_model.LinearRegression()
+            stacker = linear_model.LogisticRegression(fit_intercept=False,
+                                                      class_weight='balanced')
             stacker.fit(regression_data.iloc[:,2:], regression_data['is_class'])
             coeff_list.append(stacker.coef_.reshape(1,-1))
         self.weights = np.concatenate(tuple(coeff_list))
@@ -138,14 +151,20 @@ class FlexMatcher:
         by the meta-trainer) to combine the prediction of each classifier.
         """
         data = data.fillna('NA')
+        if data.shape[0] > 100:
+            data = data.sample(100)
         # predicting each column
         predicted_mapping = {}
         for column in list(data):
             column_dat = data[[column]]
             column_dat.columns = ['value']
+            column_name = pd.DataFrame({'value': [column]*column_dat.shape[0]})
             scores = np.zeros((len(column_dat), len(self.columns)))
             for clf_ind, clf_inst in enumerate(self.classifier_list):
-                raw_prediction = clf_inst.predict(column_dat)
+                if self.classifier_type[clf_ind] == 'value':
+                    raw_prediction = clf_inst.predict(column_dat)
+                elif self.classifier_type[clf_ind] == 'column':
+                    raw_prediction = clf_inst.predict(column_name)
                 # applying the weights to each class in the raw prediction
                 for class_ind in range(len(self.columns)):
                     raw_prediction[:,class_ind] = \
