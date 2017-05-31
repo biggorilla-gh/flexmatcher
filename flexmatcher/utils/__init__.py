@@ -1,0 +1,1 @@
+from customAnalyzer import columnAnalyzer

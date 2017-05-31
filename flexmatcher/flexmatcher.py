@@ -14,6 +14,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 import flexmatcher.classify as clf
+import flexmatcher.utils as utils
 from sklearn import linear_model
 import numpy as np
 import pandas
@@ -83,6 +84,8 @@ class FlexMatcher:
     def train(self):
         """Train each classifier and the meta-classifier."""
         word_count_clf = clf.NGramClassifier(self.training_data)
+        col_word_count_clf = clf.NGramClassifier(self.column_training_data,
+                                                 analyzer=utils.columnAnalyzer)
         biword_count_clf = clf.NGramClassifier(self.training_data,
                                                ngram_range=(2,2))
         char_count_clf = clf.NGramClassifier(self.training_data,
@@ -95,7 +98,8 @@ class FlexMatcher:
         col_char_dist_clf = clf.CharDistClassifier(self.column_training_data)
         self.classifier_list = [word_count_clf, biword_count_clf,
                                 char_count_clf, char_dist_clf,
-                                col_char_dist_clf, col_char_count_clf]
+                                col_char_dist_clf, col_char_count_clf,
+                                col_word_count_clf]
         self.prediction_list = \
             [x.predict_training() for x in self.classifier_list]
         self.train_meta_learner()
