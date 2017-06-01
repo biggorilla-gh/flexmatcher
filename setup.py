@@ -30,7 +30,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author="BigGorilla Team",
     author_email='thebiggorilla.team@gmail.com',
-    url='https://github.com/behzadg/flexmatcher',
+    url='https://github.com/biggorilla-gh/flexmatcher',
     packages=[
         'flexmatcher',
     ],
