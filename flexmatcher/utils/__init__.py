@@ -1,1 +1,1 @@
-from customAnalyzer import columnAnalyzer
+from .customAnalyzer import columnAnalyzer
