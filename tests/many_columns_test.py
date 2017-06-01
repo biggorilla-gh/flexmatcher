@@ -26,7 +26,5 @@ class ManyColumnsTest(unittest.TestCase):
         fm.create_training_data(schema_list, mapping_list)
         fm.train()
         predicted_mapping = fm.make_prediction(self.data1)
-        print (predicted_mapping)
-        print (fm.weights)
         for i in range(10):
             self.assertEqual(predicted_mapping['A' + str(i)], str(i))
