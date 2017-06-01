@@ -25,7 +25,7 @@ test_requirements = [
 
 setup(
     name='flexmatcher',
-    version='0.9.6',
+    version='0.9.10',
     description="FlexMatcher is a schema matching package in Python which handles the problem of matching multiple schemas to a single mediated schema.",
     long_description=readme + '\n\n' + history,
     author="BigGorilla Team",
@@ -33,9 +33,12 @@ setup(
     url='https://github.com/biggorilla-gh/flexmatcher',
     packages=[
         'flexmatcher',
+        'flexmatcher.utils',
+        'flexmatcher.classify'
     ],
-    package_dir={'flexmatcher':
-                 'flexmatcher'},
+    package_dir={'flexmatcher': 'flexmatcher',
+                 'flexmatcher.utils': 'flexmatcher/utils',
+                 'flexmatcher.classify': 'flexmatcher/classify'},
     include_package_data=True,
     install_requires=requirements,
     license="Apache Software License 2.0",
