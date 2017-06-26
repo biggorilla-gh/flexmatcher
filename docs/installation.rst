@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/behzadg/flexmatcher
-.. _tarball: https://github.com/behzadg/flexmatcher/tarball/master
+.. _Github repo: https://github.com/biggorilla-gh/flexmatcher
+.. _tarball: https://github.com/biggorilla-gh/flexmatcher/tarball/master
