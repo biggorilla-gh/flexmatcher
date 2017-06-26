@@ -5,10 +5,8 @@ import re
 
 def columnAnalyzer(text):
     features = []
-    tokens = text.split('-')
-    for token in tokens:
-        words = re.findall('[a-zA-Z][^A-Z]*', token)
-        for word in words:
-            features.append(word)
-    return list(set(features))
+    words = re.findall('([a-z][a-z1-9]*|[1-9]+|[A-Z](?:[a-z1-9]+|[A-Z1-9]+))', text)
+    for word in words:
+        features.append(word.lower())
+    return list(features)
 

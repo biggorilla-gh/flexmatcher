@@ -14,7 +14,7 @@ class NGramClassifier(Classifier):
 
     The NGramClassifier uses n-grams of words or characters (based on user
     preference) and extracts count features or binary features (based on user
-    preference) to train a classifier. It uses the Gaussian naive Bayes
+    preference) to train a classifier. It uses a LogisticRegression
     classifier as its training model.
 
     Attributes:
@@ -22,7 +22,7 @@ class NGramClassifier(Classifier):
         features (ndarray): Matrix storing the extracting features.
         vectorizer (object): Vectorizer for transforming text to features. It
         will be either of type CountVectorizer or HashingVectorizer.
-        clf (DecisionTreeClassifier): The classifier instance.
+        clf (LogisticRegression): The classifier instance.
         num_classes (int): Number of classes/columns to match to
     """
 

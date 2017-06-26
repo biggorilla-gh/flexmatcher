@@ -12,13 +12,13 @@ class CharDistClassifier(Classifier):
 
     The CharDistClassifier extracts 7 simple features: number of
     white-space, digit, and alphabetical characters as well as their percentage
-    and the total number of characters. Then it trains a decision tree on top
+    and the total number of characters. Then it trains a logistic regression on top
     of these features.
 
     Attributes:
         labels (ndarray): Vector storing the labels of each data-point.
         features (ndarray): Matrix storing the extracting features.
-        clf (DecisionTreeClassifier): The classifier instance.
+        clf (LogisticRegression): The classifier instance.
         num_classes (int): Number of classes/columns to match to
     """
 

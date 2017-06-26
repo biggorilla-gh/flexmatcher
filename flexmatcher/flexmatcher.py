@@ -8,7 +8,6 @@ Todo:
     * Extend the module to work with and without data or column names.
     * Allow users to add/remove classifiers.
     * Combine modules (i.e., create_training_data and training functions).
-    * Resolve the warning related to loading linear regression.
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -129,7 +128,7 @@ class FlexMatcher:
                                 message="^internal gelsd")
         coeff_list = []
         for class_ind, class_name in enumerate(self.columns):
-            # preparing the dataset for linear regression
+            # preparing the dataset for logistic regression
             regression_data = self.training_data[['class']].copy()
             regression_data['is_class'] = \
                 np.where(self.training_data['class'] == class_name, True, False)
@@ -137,7 +136,7 @@ class FlexMatcher:
             for classifier_ind, prediction in enumerate(self.prediction_list):
                 regression_data['classifer' + str(classifier_ind)] = \
                     prediction[:,class_ind]
-            # setting up the linear regression
+            # setting up the logistic regression
             stacker = linear_model.LogisticRegression(fit_intercept=True,
                                                       class_weight='balanced')
             stacker.fit(regression_data.iloc[:,2:], regression_data['is_class'])
@@ -150,7 +149,7 @@ class FlexMatcher:
         The procedure runs each classifier and then uses the weights (learned
         by the meta-trainer) to combine the prediction of each classifier.
         """
-        data = data.fillna('NA')
+        data = data.fillna('NA').copy(deep=True)
         if data.shape[0] > 100:
             data = data.sample(100)
         # predicting each column
