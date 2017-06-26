@@ -138,7 +138,7 @@ class FlexMatcher:
                 regression_data['classifer' + str(classifier_ind)] = \
                     prediction[:,class_ind]
             # setting up the linear regression
-            stacker = linear_model.LogisticRegression(fit_intercept=False,
+            stacker = linear_model.LogisticRegression(fit_intercept=True,
                                                       class_weight='balanced')
             stacker.fit(regression_data.iloc[:,2:], regression_data['is_class'])
             coeff_list.append(stacker.coef_.reshape(1,-1))

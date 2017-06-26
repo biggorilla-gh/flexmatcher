@@ -4,7 +4,7 @@ from __future__ import division
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.model_selection import StratifiedKFold
-from sklearn.naive_bayes import GaussianNB
+from sklearn import linear_model
 from flexmatcher.classify import Classifier
 import numpy as np
 
@@ -45,14 +45,14 @@ class NGramClassifier(Classifier):
         if count:
             self.vectorizer = CountVectorizer(analyzer = analyzer,
                                               ngram_range = ngram_range,
-                                              max_features = 200)
+                                              max_features = 1000)
         else:
             self.vectorizer = HashingVectorizer(analyzer = analyzer,
                                                 ngram_range = ngram_range,
-                                                n_features = 200)
+                                                n_features = 1000)
         self.features = self.vectorizer.fit_transform(values).toarray()
         # training the classifier
-        self.gnb = GaussianNB()
+        self.gnb = linear_model.LogisticRegression(class_weight='balanced')
         self.gnb.fit(self.features, self.labels)
 
     def predict_training(self, folds=5):
@@ -61,7 +61,7 @@ class NGramClassifier(Classifier):
         Args:
             folds (int): Number of folds used for prediction on training data.
         """
-        partial_clf = GaussianNB()
+        partial_clf = linear_model.LogisticRegression(class_weight='balanced')
         prediction = np.zeros((len(self.features), self.num_classes))
         skf = StratifiedKFold(n_splits=folds)
         for train_index, test_index in skf.split(self.features, self.labels):

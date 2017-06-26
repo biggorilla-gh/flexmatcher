@@ -11,7 +11,10 @@ class ManyColumnsTest(unittest.TestCase):
         for i in range(10):  # 10 columns
             vals1['A' + str(i)] = []
             for j in range(5):  # 5 data points
-                vals1['A' + str(i)].append('hi ' + str(i * 10 + j))
+                if i == 0:
+                    vals1['A' + str(i)].append('hi 0' + str(j))
+                else:
+                    vals1['A' + str(i)].append('hi ' + str(i * 10 + j))
 
         self.data1 = pd.DataFrame(vals1)
         self.data1_mapping = {}

@@ -3,7 +3,7 @@ from __future__ import print_function
 from __future__ import division
 from sklearn.model_selection import StratifiedKFold
 from flexmatcher.classify import Classifier
-from sklearn import tree
+from sklearn import linear_model
 import numpy as np
 
 class CharDistClassifier(Classifier):
@@ -50,7 +50,7 @@ class CharDistClassifier(Classifier):
             lambda val: sum(char.isspace() for char in val))
         self.features = feat_df.ix[:,1:].as_matrix()
         # training the classifier
-        self.clf = tree.DecisionTreeClassifier()
+        self.clf = linear_model.LogisticRegression(class_weight='balanced')
         self.clf.fit(self.features, self.labels)
 
     def predict_training(self, folds=5):
@@ -59,7 +59,7 @@ class CharDistClassifier(Classifier):
         Args:
             folds (int): Number of folds used for prediction on training data.
         """
-        partial_clf = tree.DecisionTreeClassifier()
+        partial_clf = linear_model.LogisticRegression(class_weight='balanced')
         prediction = np.zeros((len(self.features), self.num_classes))
         skf = StratifiedKFold(n_splits=folds)
         for train_index, test_index in skf.split(self.features, self.labels):
