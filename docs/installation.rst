@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/behzadg/flexmatcher
+    $ git clone git://github.com/biggorilla-gh/flexmatcher
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/behzadg/flexmatcher/tarball/master
+    $ curl  -OL https://github.com/biggorilla-gh/flexmatcher/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
