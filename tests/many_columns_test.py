@@ -3,6 +3,7 @@ import unittest
 
 import flexmatcher
 
+
 class ManyColumnsTest(unittest.TestCase):
 
     def setUp(self):
@@ -23,10 +24,9 @@ class ManyColumnsTest(unittest.TestCase):
 
     def test_prediction(self):
         # Using Flexmatcher
-        fm = flexmatcher.FlexMatcher()
         schema_list = [self.data1]
         mapping_list = [self.data1_mapping]
-        fm.create_training_data(schema_list, mapping_list)
+        fm = flexmatcher.FlexMatcher(schema_list, mapping_list)
         fm.train()
         predicted_mapping = fm.make_prediction(self.data1)
         for i in range(10):

@@ -6,14 +6,15 @@ from flexmatcher.classify import Classifier
 from sklearn import linear_model
 import numpy as np
 
+
 class CharDistClassifier(Classifier):
 
     """Classify the data-point using counts of character types in the data.
 
     The CharDistClassifier extracts 7 simple features: number of
     white-space, digit, and alphabetical characters as well as their percentage
-    and the total number of characters. Then it trains a logistic regression on top
-    of these features.
+    and the total number of characters. Then it trains a logistic regression on
+    top of these features.
 
     Attributes:
         labels (ndarray): Vector storing the labels of each data-point.
@@ -22,7 +23,11 @@ class CharDistClassifier(Classifier):
         num_classes (int): Number of classes/columns to match to
     """
 
-    def __init__(self, data):
+    def __init__(self):
+        """Initializes the classifier."""
+        self.clf = linear_model.LogisticRegression(class_weight='balanced')
+
+    def fit(self, data):
         """Extracts features and labels from the data and fits a model.
 
         Args:
@@ -34,23 +39,22 @@ class CharDistClassifier(Classifier):
         feat_df = data[['value']].copy()
         feat_df['length'] = feat_df['value'].apply(lambda val: len(val))
         feat_df['digit_frac'] = feat_df['value'].apply(
-            lambda val: 0 if len(val) == 0 else \
+            lambda val: 0 if len(val) == 0 else
             sum(char.isdigit() for char in val) / len(val))
         feat_df['digit_num'] = feat_df['value'].apply(
             lambda val: sum(char.isdigit() for char in val))
         feat_df['alpha_frac'] = feat_df['value'].apply(
-            lambda val: 0 if len(val) == 0 else \
+            lambda val: 0 if len(val) == 0 else
             sum(char.isalpha() for char in val) / len(val))
         feat_df['alpha_num'] = feat_df['value'].apply(
             lambda val: sum(char.isalpha() for char in val))
         feat_df['space_frac'] = feat_df['value'].apply(
-            lambda val: 0 if len(val) == 0 else \
+            lambda val: 0 if len(val) == 0 else
             sum(char.isspace() for char in val) / len(val))
         feat_df['space_num'] = feat_df['value'].apply(
             lambda val: sum(char.isspace() for char in val))
-        self.features = feat_df.ix[:,1:].as_matrix()
+        self.features = feat_df.ix[:, 1:].as_matrix()
         # training the classifier
-        self.clf = linear_model.LogisticRegression(class_weight='balanced')
         self.clf.fit(self.features, self.labels)
 
     def predict_training(self, folds=5):
@@ -81,19 +85,19 @@ class CharDistClassifier(Classifier):
         feat_df = data[['value']].copy()
         feat_df['length'] = feat_df['value'].apply(lambda val: len(val))
         feat_df['digit_frac'] = feat_df['value'].apply(
-            lambda val: 0 if len(val) == 0 else \
+            lambda val: 0 if len(val) == 0 else
             sum(char.isdigit() for char in val) / len(val))
         feat_df['digit_num'] = feat_df['value'].apply(
             lambda val: sum(char.isdigit() for char in val))
         feat_df['alpha_frac'] = feat_df['value'].apply(
-            lambda val: 0 if len(val) == 0 else \
+            lambda val: 0 if len(val) == 0 else
             sum(char.isalpha() for char in val) / len(val))
         feat_df['alpha_num'] = feat_df['value'].apply(
             lambda val: sum(char.isalpha() for char in val))
         feat_df['space_frac'] = feat_df['value'].apply(
-            lambda val: 0 if len(val) == 0 else \
+            lambda val: 0 if len(val) == 0 else
             sum(char.isspace() for char in val) / len(val))
         feat_df['space_num'] = feat_df['value'].apply(
             lambda val: sum(char.isspace() for char in val))
-        features = feat_df.ix[:,1:].as_matrix()
+        features = feat_df.ix[:, 1:].as_matrix()
         return self.clf.predict_proba(features)

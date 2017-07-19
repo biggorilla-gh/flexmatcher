@@ -14,12 +14,19 @@ from __future__ import print_function
 from __future__ import division
 from abc import ABCMeta, abstractmethod
 
+
 class Classifier(object):
 
     """Define classifier interface for FlexMatcher."""
     __metaclass__ = ABCMeta
+
     @abstractmethod
     def __init__(self, data):
+        """Initialize the class."""
+        pass
+
+    @abstractmethod
+    def fit(self, data):
         """Train based on the input training data."""
         pass
 
@@ -32,6 +39,3 @@ class Classifier(object):
     def predict(self, data):
         """Predict for unseen data."""
         pass
-
-
-

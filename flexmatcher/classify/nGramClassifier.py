@@ -8,6 +8,7 @@ from sklearn import linear_model
 from flexmatcher.classify import Classifier
 import numpy as np
 
+
 class NGramClassifier(Classifier):
 
     """Classify data-points using counts of n-gram sequence of words or chars.
@@ -26,34 +27,41 @@ class NGramClassifier(Classifier):
         num_classes (int): Number of classes/columns to match to
     """
 
-    def __init__(self, data, ngram_range=(1,1), analyzer='word', count=True):
-        """Extracts features and labels from the data and fits a model.
+    def __init__(self, ngram_range=(1, 1), analyzer='word', count=True,
+                 n_features=1000):
+        """Initializes the classifier.
 
         Args:
-            data (dataframe): Training data (values and their correct column).
             ngram_range (tuple): Pair of ints specifying the range of ngrams.
             analyzer (string): Determines what type of analyzer to be used.
             Setting it to 'word' will consider each word as a unit of language
             and 'char' will consider each character as a unit of language.
             count (boolean): Determines if features are counts of n-grams
             versus a binary value encoding if the n-gram is present or not.
+            n_features (int): Maximum number of features used.
+        """
+        # checking what type of vectorizer to create
+        if count:
+            self.vectorizer = CountVectorizer(analyzer=analyzer,
+                                              ngram_range=ngram_range,
+                                              max_features=1000)
+        else:
+            self.vectorizer = HashingVectorizer(analyzer=analyzer,
+                                                ngram_range=ngram_range,
+                                                n_features=1000)
+
+    def fit(self, data):
+        """
+        Args:
+            data (dataframe): Training data (values and their correct column).
         """
         self.labels = np.array(data['class'])
         self.num_classes = len(data['class'].unique())
         values = list(data['value'])
-        # checking what type of vectorize to create
-        if count:
-            self.vectorizer = CountVectorizer(analyzer = analyzer,
-                                              ngram_range = ngram_range,
-                                              max_features = 1000)
-        else:
-            self.vectorizer = HashingVectorizer(analyzer = analyzer,
-                                                ngram_range = ngram_range,
-                                                n_features = 1000)
         self.features = self.vectorizer.fit_transform(values).toarray()
         # training the classifier
-        self.gnb = linear_model.LogisticRegression(class_weight='balanced')
-        self.gnb.fit(self.features, self.labels)
+        self.lrm = linear_model.LogisticRegression(class_weight='balanced')
+        self.lrm.fit(self.features, self.labels)
 
     def predict_training(self, folds=5):
         """Do cross-validation and return probabilities for each data-point.
@@ -82,6 +90,4 @@ class NGramClassifier(Classifier):
         """
         values = list(data['value'])
         features = self.vectorizer.transform(values).toarray()
-        return self.gnb.predict_proba(features)
-
-
+        return self.lrm.predict_proba(features)
