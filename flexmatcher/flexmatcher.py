@@ -73,10 +73,13 @@ class FlexMatcher:
                                                      ngram_range=(2, 6))
             col_word_count_clf = \
                 clf.NGramClassifier(analyzer=utils.columnAnalyzer)
+            knn_clf = \
+                clf.KNNClassifier()
             self.classifier_list = self.classifier_list + [col_char_dist_clf,
                                                            col_char_count_clf,
-                                                           col_word_count_clf]
-            self.classifier_type = self.classifier_type + (['column'] * 3)
+                                                           col_word_count_clf,
+                                                           knn_clf]
+            self.classifier_type = self.classifier_type + (['column'] * 4)
 
     def create_training_data(self, dataframes, mappings, sample_size):
         """Transform dataframes and mappings into training data.
