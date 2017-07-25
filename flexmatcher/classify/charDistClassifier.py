@@ -21,6 +21,7 @@ class CharDistClassifier(Classifier):
         features (ndarray): Matrix storing the extracting features.
         clf (LogisticRegression): The classifier instance.
         num_classes (int): Number of classes/columns to match to
+        all_classes (ndarray): Sorted array of all possible classes
     """
 
     def __init__(self):
@@ -35,6 +36,7 @@ class CharDistClassifier(Classifier):
         """
         self.labels = np.array(data['class'])
         self.num_classes = len(data['class'].unique())
+        self.all_classes = np.sort(np.unique(self.labels))
         # populating the features dataframe
         feat_df = data[['value']].copy()
         feat_df['length'] = feat_df['value'].apply(lambda val: len(val))
@@ -73,8 +75,25 @@ class CharDistClassifier(Classifier):
             training_labels = self.labels[train_index]
             # fitting the model and predicting
             partial_clf.fit(training_features, training_labels)
-            prediction[test_index] = partial_clf.predict_proba(test_features)
+            curr_pred = partial_clf.predict_proba(test_features)
+            prediction[test_index] = \
+                self.predict_proba_ordered(curr_pred, partial_clf.classes_)
         return prediction
+
+    def predict_proba_ordered(self, probs, classes):
+        """Fills out the probability matrix with classes that were missing.
+
+        Args:
+            probs (list): list of probabilities, output of predict_proba
+            classes_ (ndarray): list of classes from clf.classes_
+            all_classes (ndarray): list of all possible classes
+        """
+        proba_ordered = np.zeros((probs.shape[0], self.all_classes.size),
+                                 dtype=np.float)
+        sorter = np.argsort(self.all_classes)
+        idx = sorter[np.searchsorted(self.all_classes, classes, sorter=sorter)]
+        proba_ordered[:, idx] = probs
+        return proba_ordered
 
     def predict(self, data):
         """Predict the class for a new given data.

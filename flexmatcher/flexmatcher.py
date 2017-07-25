@@ -17,6 +17,7 @@ import flexmatcher.utils as utils
 from sklearn import linear_model
 import numpy as np
 import pandas as pd
+import time
 
 
 class FlexMatcher:
@@ -60,17 +61,19 @@ class FlexMatcher:
             sample_size (int): The number of rows sampled from each dataframe
                 for training.
         """
+        print('Create training data ...')
         self.create_training_data(dataframe, mappings, sample_size)
+        print('Training data done ...')
         bigram_count_clf = clf.NGramClassifier(ngram_range=(1, 2))
         char_count_clf = clf.NGramClassifier(analyzer='char_wb',
-                                             ngram_range=(1, 6))
+                                             ngram_range=(1, 4))
         char_dist_clf = clf.CharDistClassifier()
         self.classifier_list = [bigram_count_clf, char_count_clf, char_dist_clf]
         self.classifier_type = ['value', 'value', 'value']
         if self.data_src_num > 5:
             col_char_dist_clf = clf.CharDistClassifier()
             col_char_count_clf = clf.NGramClassifier(analyzer='char_wb',
-                                                     ngram_range=(2, 6))
+                                                     ngram_range=(3, 6))
             col_word_count_clf = \
                 clf.NGramClassifier(analyzer=utils.columnAnalyzer)
             knn_clf = \
@@ -131,6 +134,7 @@ class FlexMatcher:
         self.prediction_list = []
         for (clf_inst, clf_type) in zip(self.classifier_list,
                                         self.classifier_type):
+            start = time.time()
             # fitting the models and predict for training data
             if clf_type == 'value':
                 clf_inst.fit(self.train_data)
@@ -141,14 +145,15 @@ class FlexMatcher:
                 # predicting the training data
                 col_data_prediction = \
                     pd.concat([pd.DataFrame(clf_inst.predict_training()),
-                               self.col_train_data],
-                              axis=1)
+                               self.col_train_data], axis=1)
                 data_prediction = self.train_data.merge(col_data_prediction,
-                                                        on='name', how='left')
+                                                        on=['name', 'class'],
+                                                        how='left')
                 data_prediction = np.asarray(data_prediction)
                 data_prediction = \
                     data_prediction[:, range(3, 3 + len(self.columns))]
                 self.prediction_list.append(data_prediction)
+            print(time.time() - start)
 
         self.train_meta_learner()
 
