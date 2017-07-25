@@ -49,7 +49,7 @@ class FlexMatcher:
         columns (list): The sorted list of column names in the mediated schema.
     """
 
-    def __init__(self, dataframe, mappings, sample_size=200):
+    def __init__(self, dataframe, mappings, sample_size=300):
         """Prepares the list of classifiers that are being used for matching
         the schemas and creates the training data from the input datafames
         and their mappings.
@@ -64,25 +64,40 @@ class FlexMatcher:
         print('Create training data ...')
         self.create_training_data(dataframe, mappings, sample_size)
         print('Training data done ...')
-        bigram_count_clf = clf.NGramClassifier(ngram_range=(1, 2))
-        char_count_clf = clf.NGramClassifier(analyzer='char_wb',
-                                             ngram_range=(1, 4))
+        unigram_count_clf = clf.NGramClassifier(ngram_range=(1, 1))
+        bigram_count_clf = clf.NGramClassifier(ngram_range=(2, 2))
+        unichar_count_clf = clf.NGramClassifier(analyzer='char_wb',
+                                                ngram_range=(1, 1))
+        bichar_count_clf = clf.NGramClassifier(analyzer='char_wb',
+                                               ngram_range=(2, 2))
+        trichar_count_clf = clf.NGramClassifier(analyzer='char_wb',
+                                                ngram_range=(3, 3))
+        quadchar_count_clf = clf.NGramClassifier(analyzer='char_wb',
+                                                 ngram_range=(4, 4))
         char_dist_clf = clf.CharDistClassifier()
-        self.classifier_list = [bigram_count_clf, char_count_clf, char_dist_clf]
-        self.classifier_type = ['value', 'value', 'value']
+        self.classifier_list = [unigram_count_clf, bigram_count_clf,
+                                unichar_count_clf, bichar_count_clf,
+                                trichar_count_clf, quadchar_count_clf,
+                                char_dist_clf]
+        self.classifier_type = ['value', 'value', 'value', 'value',
+                                'value', 'value', 'value']
         if self.data_src_num > 5:
             col_char_dist_clf = clf.CharDistClassifier()
-            col_char_count_clf = clf.NGramClassifier(analyzer='char_wb',
-                                                     ngram_range=(3, 6))
+            col_trichar_count_clf = clf.NGramClassifier(analyzer='char_wb',
+                                                        ngram_range=(3, 3))
+            col_quadchar_count_clf = clf.NGramClassifier(analyzer='char_wb',
+                                                         ngram_range=(4, 4))
+            col_quintchar_count_clf = clf.NGramClassifier(analyzer='char_wb',
+                                                          ngram_range=(5, 5))
             col_word_count_clf = \
                 clf.NGramClassifier(analyzer=utils.columnAnalyzer)
             knn_clf = \
                 clf.KNNClassifier()
-            self.classifier_list = self.classifier_list + [col_char_dist_clf,
-                                                           col_char_count_clf,
-                                                           col_word_count_clf,
-                                                           knn_clf]
-            self.classifier_type = self.classifier_type + (['column'] * 4)
+            self.classifier_list = self.classifier_list + \
+                [col_char_dist_clf, col_trichar_count_clf,
+                 col_quadchar_count_clf, col_quintchar_count_clf,
+                 col_word_count_clf, knn_clf]
+            self.classifier_type = self.classifier_type + (['column'] * 6)
 
     def create_training_data(self, dataframes, mappings, sample_size):
         """Transform dataframes and mappings into training data.
@@ -155,7 +170,9 @@ class FlexMatcher:
                 self.prediction_list.append(data_prediction)
             print(time.time() - start)
 
+        start = time.time()
         self.train_meta_learner()
+        print('Meta: ' + str(time.time() - start))
 
     def train_meta_learner(self):
         """Train the meta-classifier.
