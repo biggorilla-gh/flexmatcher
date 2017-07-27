@@ -17,6 +17,7 @@ import flexmatcher.utils as utils
 from sklearn import linear_model
 import numpy as np
 import pandas as pd
+import pickle
 import time
 
 
@@ -49,7 +50,7 @@ class FlexMatcher:
         columns (list): The sorted list of column names in the mediated schema.
     """
 
-    def __init__(self, dataframe, mappings, sample_size=300):
+    def __init__(self, dataframes, mappings, sample_size=300):
         """Prepares the list of classifiers that are being used for matching
         the schemas and creates the training data from the input datafames
         and their mappings.
@@ -62,7 +63,7 @@ class FlexMatcher:
                 for training.
         """
         print('Create training data ...')
-        self.create_training_data(dataframe, mappings, sample_size)
+        self.create_training_data(dataframes, mappings, sample_size)
         print('Training data done ...')
         unigram_count_clf = clf.NGramClassifier(ngram_range=(1, 1))
         bigram_count_clf = clf.NGramClassifier(ngram_range=(2, 2))
@@ -235,3 +236,8 @@ class FlexMatcher:
             max_ind = flat_scores.argmax()
             predicted_mapping[column] = self.columns[max_ind]
         return predicted_mapping
+
+    def save_model(self, name):
+        """Serializes the FlexMatcher object into a model file using python's
+        picke library."""
+        pickle.dump(self, open(name + '.model', 'wb'))
