@@ -17,7 +17,7 @@ import flexmatcher.utils as utils
 from sklearn import linear_model
 import numpy as np
 import pandas as pd
-import pickle
+import cPickle as pickle
 import time
 
 
