@@ -13,7 +13,8 @@ requirements = [
     'pandas',
     'scipy',
     'scikit-learn>=0.18',
-    'numpy'
+    'numpy',
+    'python-Levenshtein==0.12.0'
 ]
 
 test_requirements = [
@@ -25,7 +26,7 @@ test_requirements = [
 
 setup(
     name='flexmatcher',
-    version='1.0.0',
+    version='1.0.2',
     description="FlexMatcher is a schema matching package in Python which handles the problem of matching multiple schemas to a single mediated schema.",
     long_description=readme + '\n\n' + history,
     author="BigGorilla Team",
