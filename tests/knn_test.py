@@ -26,7 +26,7 @@ class KNNTest(unittest.TestCase):
             value = ''.join(value)
             col_class[i] = sample_class
             col_value[i] = value
-        return(pd.DataFrame(zip(col_value, col_value, col_class),
+        return(pd.DataFrame(list(zip(col_value, col_value, col_class)),
                             columns=['name', 'value', 'class']))
 
     def test_prediction(self):
@@ -36,4 +36,4 @@ class KNNTest(unittest.TestCase):
         res = clf.predict(self.dat_test)
         for i in range(len(self.dat_test)):
             correct_ind = clf.column_index[self.dat_test['class'][i]]
-            self.assertTrue(res[i,correct_ind] > 0.5)
+            self.assertTrue(res[i, correct_ind] > 0.5)

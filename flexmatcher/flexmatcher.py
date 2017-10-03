@@ -240,4 +240,5 @@ class FlexMatcher:
     def save_model(self, name):
         """Serializes the FlexMatcher object into a model file using python's
         picke library."""
-        pickle.dump(self, open(name + '.model', 'wb'))
+        with open(name + '.model', 'wb') as f:
+            pickle.dump(self, f)

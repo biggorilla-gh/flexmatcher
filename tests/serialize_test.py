@@ -37,6 +37,7 @@ class SerializeTest(unittest.TestCase):
         fm.train()
         # storing the existing model
         fm.save_model('test')
-        fm_loaded = pickle.load(open('test.model', 'rb'))
-        self.assertListEqual(fm.columns, fm_loaded.columns)
-        self.assertTrue(fm.train_data.equals(fm_loaded.train_data))
+        with open('test.model', 'rb') as f:
+            fm_loaded = pickle.load(f)
+            self.assertListEqual(fm.columns, fm_loaded.columns)
+            self.assertTrue(fm.train_data.equals(fm_loaded.train_data))
