@@ -44,10 +44,9 @@ are related to the attributes of our interest. To do so, we need to
 create an instance of FlexMatcher, make a list of available datasets
 and their mappings to the desired attributes, and train the FlexMatcher.::
 
-    fm = flexmatcher.FlexMatcher()
     schema_list = [data1, data2]
     mapping_list = [data1_mapping, data2_mapping]
-    fm.create_training_data(schema_list, mapping_list)
+    fm = flexmatcher.FlexMatcher(schema_list, mapping_list, sample_size=100)
     fm.train()
 
 Then, we can use the trained FlexMatcher to predict the mappings for the 
