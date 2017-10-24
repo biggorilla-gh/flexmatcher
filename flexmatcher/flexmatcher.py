@@ -44,9 +44,9 @@ class FlexMatcher:
             Possible values are 'column' and 'value' classifiers.
         prediction_list (list): List of predictions on the training data
             produced by each classifier.
-        weights (ndarray): A matrix where cell (i,j) captures how good the j-th
-            classifier is at predicting if a column should match the i-th
-            column (where columns are sorted by name) in the mediated schema.
+        meta_model (LogisticRegression): The meta-learner model which outputs
+            the best prediction based on the predictions of the base
+            classifiers.
         columns (list): The sorted list of column names in the mediated schema.
     """
 
@@ -170,7 +170,6 @@ class FlexMatcher:
                     data_prediction[:, range(3, 3 + len(self.columns))]
                 self.prediction_list.append(data_prediction)
             print(time.time() - start)
-
         start = time.time()
         self.train_meta_learner()
         print('Meta: ' + str(time.time() - start))
@@ -180,30 +179,21 @@ class FlexMatcher:
 
         The data used for training the meta-classifier is the probability of
         assigning each point to each column (or class) by each classifier. The
-        learned weights suggest how good each classifier is at predicting a
-        particular class."""
-        # suppressing a warning from scipy that gelsd is broken and gless is
-        # being used instead.
-        # warnings.filterwarnings(action="ignore", module="scipy",
-        #                        message="^internal gelsd")
-        coeff_list = []
-        for class_ind, class_name in enumerate(self.columns):
-            # preparing the dataset for logistic regression
-            regression_data = self.train_data[['class']].copy()
-            regression_data['is_class'] = \
-                np.where(self.train_data['class'] == class_name, True, False)
-            # adding the prediction probability from classifiers
-            for classifier_ind, prediction in enumerate(self.prediction_list):
-                regression_data['classifer' + str(classifier_ind)] = \
-                    prediction[:, class_ind]
-
-            # setting up the logistic regression
-            stacker = linear_model.LogisticRegression(fit_intercept=True,
-                                                      class_weight='balanced')
-            stacker.fit(regression_data.iloc[:, 2:],
-                        regression_data['is_class'])
-            coeff_list.append(stacker.coef_.reshape(1, -1))
-        self.weights = np.concatenate(tuple(coeff_list))
+        meta-classifier is a logistic regression model that predicts the best
+        label based on the output of base-classifiers."""
+        self.meta_model = linear_model.LogisticRegression()
+        # preparing the dataset for logistic regression
+        regression_data = self.train_data[['class']].copy()
+        # adding the prediction probability from classifiers
+        for classifier_ind, prediction in enumerate(self.prediction_list):
+            classifier_name = 'classifer' + str(classifier_ind)
+            column_names = [classifier_name + x for x in self.columns]
+            for c in column_names:
+                regression_data[c] = None
+            regression_data[column_names] = prediction
+        # setting up the logistic regression
+        self.meta_model.fit(regression_data.iloc[:, 1:],
+                            regression_data['class'])
 
     def make_prediction(self, data):
         """Map the schema of a given dataframe to the column of mediated schema.
@@ -220,21 +210,22 @@ class FlexMatcher:
             column_dat = data[[column]]
             column_dat.columns = ['value']
             column_name = pd.DataFrame({'value': [column]*column_dat.shape[0]})
-            scores = np.zeros((len(column_dat), len(self.columns)))
+            regression_data = pd.DataFrame()
             for clf_ind, clf_inst in enumerate(self.classifier_list):
                 if self.classifier_type[clf_ind] == 'value':
                     raw_prediction = clf_inst.predict(column_dat)
                 elif self.classifier_type[clf_ind] == 'column':
                     raw_prediction = clf_inst.predict(column_name)
                 # applying the weights to each class in the raw prediction
-                for class_ind in range(len(self.columns)):
-                    raw_prediction[:, class_ind] = \
-                        (raw_prediction[:, class_ind] *
-                         self.weights[class_ind, clf_ind])
-                scores = scores + raw_prediction
-            flat_scores = scores.sum(axis=0) / len(column_dat)
-            max_ind = flat_scores.argmax()
-            predicted_mapping[column] = self.columns[max_ind]
+                classifier_name = 'classifier' + str(clf_ind)
+                column_names = [classifier_name + x for x in self.columns]
+                curr_dat = pd.DataFrame(raw_prediction, columns=column_names)
+                regression_data = pd.concat([regression_data, curr_dat],
+                                            axis=1)
+            result = self.meta_model.predict_proba(regression_data)
+            result = np.sum(result, axis=0) / len(column_dat)
+            max_ind = result.argmax()
+            predicted_mapping[column] = self.meta_model.classes_[max_ind]
         return predicted_mapping
 
     def save_model(self, name):
