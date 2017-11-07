@@ -22,7 +22,7 @@ import time
 import os
 
 
-class FlexMatcher:
+class FlexMatcher(object):
 
     """Match a given schema to the mediated schema.
 
@@ -262,7 +262,7 @@ class FlexMatcher:
         if not os.path.exists(input_file):
             print('The model file (' + input_file + ') does not exists!')
             return None
-        obj = cls.__new__(cls)
+        obj = super(FlexMatcher, cls).__new__(cls)
         with open(input_file, 'rb') as f:
             data_tuple = pickle.load(f)
             (classifier_list, classifier_type, meta_model, columns) = data_tuple
