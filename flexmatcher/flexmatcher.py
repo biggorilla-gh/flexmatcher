@@ -19,9 +19,10 @@ import numpy as np
 import pandas as pd
 import pickle
 import time
+import os
 
 
-class FlexMatcher:
+class FlexMatcher(object):
 
     """Match a given schema to the mediated schema.
 
@@ -200,6 +201,13 @@ class FlexMatcher:
 
         The procedure runs each classifier and then uses the weights (learned
         by the meta-trainer) to combine the prediction of each classifier.
+
+        Args:
+            data (dataframe): the input dataframe for which predictions should
+                 be made.
+        Returns:
+            dict: a dictionary that maps the columns of the input dataframe to
+            the columns in the mediated schema.
         """
         data = data.fillna('NA').copy(deep=True)
         if data.shape[0] > 100:
@@ -228,8 +236,38 @@ class FlexMatcher:
             predicted_mapping[column] = self.meta_model.classes_[max_ind]
         return predicted_mapping
 
-    def save_model(self, name):
+    def save_model(self, output_file):
         """Serializes the FlexMatcher object into a model file using python's
-        picke library."""
-        with open(name + '.model', 'wb') as f:
-            pickle.dump(self, f)
+        pickel library.
+
+        Args:
+            output_file (str): the path of the output file.
+        """
+        data_tuple = (self.classifier_list, self.classifier_type,
+                      self.meta_model, self.columns)
+        with open(output_file, 'wb') as f:
+            pickle.dump(data_tuple, f)
+
+    @classmethod
+    def load_model(cls, input_file):
+        """Deserialize the FlexMatcher object from a model file using python's
+        pickel library.
+
+        Args:
+            input_file (str): the path to the model file.
+
+        Returns:
+            FlexMatcher: the loaded instance of FlexMatcher
+        """
+        if not os.path.exists(input_file):
+            print('The model file (' + input_file + ') does not exists!')
+            return None
+        obj = super(FlexMatcher, cls).__new__(cls)
+        with open(input_file, 'rb') as f:
+            data_tuple = pickle.load(f)
+            (classifier_list, classifier_type, meta_model, columns) = data_tuple
+            obj.columns = columns
+            obj.meta_model = meta_model
+            obj.classifier_list = classifier_list
+            obj.classifier_type = classifier_type
+        return obj
