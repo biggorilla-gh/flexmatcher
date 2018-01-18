@@ -14,14 +14,17 @@ requirements = [
     'scipy',
     'scikit-learn>=0.18',
     'numpy',
-    'python-Levenshtein==0.12.0'
+    'python-Levenshtein==0.12.0',
+    'Munkres'
 ]
 
 test_requirements = [
     'pandas',
     'scipy',
     'scikit-learn>=0.18',
-    'numpy'
+    'numpy',
+    'python-Levenshtein==0.12.0',
+    'Munkres'
 ]
 
 setup(
