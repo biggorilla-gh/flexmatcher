@@ -19,7 +19,6 @@ from munkres import Munkres
 import numpy as np
 import pandas as pd
 import pickle
-import time
 import os
 
 
@@ -66,7 +65,6 @@ class FlexMatcher(object):
         """
         print('Create training data ...')
         self.create_training_data(dataframes, mappings, sample_size)
-        print('Training data done ...')
         unigram_count_clf = clf.NGramClassifier(ngram_range=(1, 1))
         bigram_count_clf = clf.NGramClassifier(ngram_range=(2, 2))
         unichar_count_clf = clf.NGramClassifier(analyzer='char_wb',
@@ -149,10 +147,10 @@ class FlexMatcher(object):
 
     def train(self):
         """Train each classifier and the meta-classifier."""
+        print('Training FlexMatcher ...')
         self.prediction_list = []
         for (clf_inst, clf_type) in zip(self.classifier_list,
                                         self.classifier_type):
-            start = time.time()
             # fitting the models and predict for training data
             if clf_type == 'value':
                 clf_inst.fit(self.train_data)
@@ -171,10 +169,8 @@ class FlexMatcher(object):
                 data_prediction = \
                     data_prediction[:, range(3, 3 + len(self.columns))]
                 self.prediction_list.append(data_prediction)
-            print(time.time() - start)
-        start = time.time()
         self.train_meta_learner()
-        print('Meta: ' + str(time.time() - start))
+        print('Training Completed ...')
 
     def train_meta_learner(self):
         """Train the meta-classifier.
