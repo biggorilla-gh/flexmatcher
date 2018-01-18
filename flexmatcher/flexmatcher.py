@@ -15,6 +15,7 @@ from __future__ import division
 import flexmatcher.classify as clf
 import flexmatcher.utils as utils
 from sklearn import linear_model
+from munkres import Munkres
 import numpy as np
 import pandas as pd
 import pickle
@@ -196,7 +197,7 @@ class FlexMatcher(object):
         self.meta_model.fit(regression_data.iloc[:, 1:],
                             regression_data['class'])
 
-    def make_prediction(self, data):
+    def make_prediction(self, data, predict_all=False):
         """Map the schema of a given dataframe to the column of mediated schema.
 
         The procedure runs each classifier and then uses the weights (learned
@@ -210,10 +211,11 @@ class FlexMatcher(object):
             the columns in the mediated schema.
         """
         data = data.fillna('NA').copy(deep=True)
-        if data.shape[0] > 100:
-            data = data.sample(100)
+        if data.shape[0] > 500:
+            data = data.sample(500)
         # predicting each column
         predicted_mapping = {}
+        likelihoods = []
         for column in list(data):
             column_dat = data[[column]]
             column_dat.columns = ['value']
@@ -232,8 +234,19 @@ class FlexMatcher(object):
                                             axis=1)
             result = self.meta_model.predict_proba(regression_data)
             result = np.sum(result, axis=0) / len(column_dat)
-            max_ind = result.argmax()
-            predicted_mapping[column] = self.meta_model.classes_[max_ind]
+            if predict_all:
+                max_ind = result.argmax()
+                predicted_mapping[column] = self.meta_model.classes_[max_ind]
+            else:
+                likelihoods.append([-x for x in result])
+        # we need to compute the maximal matching if we are not making a
+        # prediction for all the columns
+        if not predict_all:
+            munk = Munkres()
+            indexes = munk.compute(likelihoods)
+            for (row, col) in indexes:
+                predicted_mapping[list(data)[row]] = \
+                    self.meta_model.classes_[col]
         return predicted_mapping
 
     def save_model(self, output_file):
