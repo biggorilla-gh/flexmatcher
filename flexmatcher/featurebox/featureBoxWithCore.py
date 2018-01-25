@@ -71,7 +71,7 @@ class FeatureBoxWithCore(FeatureBox):
             self.data_type = 'str'
         # creating a classifier if needed
         if return_probs:
-            self.clf = LogisticRegression()
+            self.clf = LogisticRegression(class_weight='balanced')
         else:
             self.clf = None
 
