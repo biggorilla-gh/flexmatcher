@@ -40,11 +40,11 @@ setup(
     packages=[
         'flexmatcher',
         'flexmatcher.utils',
-        'flexmatcher.classify'
+        'flexmatcher.featurebox'
     ],
     package_dir={'flexmatcher': 'flexmatcher',
                  'flexmatcher.utils': 'flexmatcher/utils',
-                 'flexmatcher.classify': 'flexmatcher/classify'},
+                 'flexmatcher.featurebox': 'flexmatcher/featurebox'},
     include_package_data=True,
     install_requires=requirements,
     license="Apache Software License 2.0",

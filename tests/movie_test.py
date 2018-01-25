@@ -41,9 +41,9 @@ class MovieTest(unittest.TestCase):
         # Using Flexmatcher
         schema_list = [self.data1, self.data2]
         mapping_list = [self.data1_mapping, self.data2_mapping]
-        fm = flexmatcher.FlexMatcher(schema_list, mapping_list)
-        fm.train()
-        predicted_mapping = fm.make_prediction(self.data3)
+        fm = flexmatcher.FlexMatcher()
+        fm.train(schema_list, mapping_list)
+        predicted_mapping = fm.predict(self.data3)
         self.assertEqual(predicted_mapping['rt'], 'movie_rating')
         self.assertEqual(predicted_mapping['yr'], 'movie_year')
         self.assertEqual(predicted_mapping['id'], 'movie_name')

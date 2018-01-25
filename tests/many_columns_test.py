@@ -26,8 +26,8 @@ class ManyColumnsTest(unittest.TestCase):
         # Using Flexmatcher
         schema_list = [self.data1]
         mapping_list = [self.data1_mapping]
-        fm = flexmatcher.FlexMatcher(schema_list, mapping_list)
-        fm.train()
-        predicted_mapping = fm.make_prediction(self.data1)
+        fm = flexmatcher.FlexMatcher()
+        fm.train(schema_list, mapping_list)
+        predicted_mapping = fm.predict(self.data1)
         for i in range(10):
             self.assertEqual(predicted_mapping['A' + str(i)], str(i))
