@@ -18,6 +18,8 @@ from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 from munkres import Munkres
 import pandas as pd
+import pickle
+import os
 
 
 class FlexMatcher(object):
@@ -159,3 +161,28 @@ class FlexMatcher(object):
         predict_data = pd.DataFrame({'name': df_column_names,
                                      'data': df_column_data})
         return predict_data
+
+    def save_model(self, output_file):
+        """Serializes the FlexMatcher object into a model file using python's
+        pickel library.
+        Args:
+            output_file (str): the path of the output file.
+        """
+        with open(output_file, 'wb') as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load_model(cls, input_file):
+        """Deserialize the FlexMatcher object from a model file using python's
+        pickel library.
+        Args:
+            input_file (str): the path to the model file.
+        Returns:
+            FlexMatcher: the loaded instance of FlexMatcher
+        """
+        if not os.path.exists(input_file):
+            print('The model file (' + input_file + ') does not exists!')
+            return None
+        with open(input_file, 'rb') as f:
+            loaded_matcher = pickle.load(f)
+        return loaded_matcher
