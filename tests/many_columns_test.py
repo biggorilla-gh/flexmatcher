@@ -24,8 +24,8 @@ class ManyColumnsTest(unittest.TestCase):
 
     def test_prediction(self):
         # Using Flexmatcher
-        schema_list = [self.data1]
-        mapping_list = [self.data1_mapping]
+        schema_list = [self.data1, self.data1]
+        mapping_list = [self.data1_mapping, self.data1_mapping]
         fm = flexmatcher.FlexMatcher()
         fm.train(schema_list, mapping_list)
         predicted_mapping = fm.predict(self.data1)
