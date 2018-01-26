@@ -11,10 +11,10 @@ from __future__ import print_function
 from __future__ import division
 
 from abc import ABCMeta, abstractmethod
-from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
-class FeatureBox(BaseEstimator, ClassifierMixin):
+class FeatureBox(BaseEstimator, TransformerMixin):
 
     """Define the interface implemented by all feature-extractor modules in
     FlexMatcher.
