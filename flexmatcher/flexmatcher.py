@@ -10,6 +10,7 @@ from __future__ import division
 
 import flexmatcher.featurebox as fbox
 import flexmatcher.utils as utils
+import flexmatcher.core as core
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -45,8 +46,11 @@ class FlexMatcher(object):
                                          ngram_range=(n_gram, n_gram)),
                     return_probs=False
                 )
-        # TODO: features to be implemented
-        # feature_boxes['char_dist'] = fbox.CharDistFeatureBox()
+        # features based on type of characters
+        self.feature_boxes['c_dist'] = fbox.FeatureBoxWithCore(
+            core=core.CharDistCore(),
+            return_probs=False
+        )
 
     def _init_header_featureboxes(self):
         # features based on words
@@ -65,9 +69,13 @@ class FlexMatcher(object):
                     uses_data=False,
                     return_probs=False
                 )
+        self.feature_boxes['col_c_dist'] = fbox.FeatureBoxWithCore(
+            core=core.CharDistCore(),
+            uses_data=False,
+            return_probs=False
+        )
         # TODO: features to be implemented
         # knn_clf = clf.KNNClassifier()
-        # feature_boxes['col_c_dist'] = fbox.CharDistFeatureBox(uses_data=False)
 
     def _build_pipeline(self):
         # building a feature union
