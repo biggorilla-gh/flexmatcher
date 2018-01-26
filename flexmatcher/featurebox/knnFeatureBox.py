@@ -1,27 +1,15 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
+
+from flexmatcher.featurebox import FeatureBox
+
 from sklearn.model_selection import StratifiedKFold
-from flexmatcher.classify import Classifier
-import numpy as np
 import Levenshtein as lev
+import numpy as np
 
 
-class KNNClassifier(Classifier):
-
-    """Classify data-points (in string format) using their 3 nearest neighbors
-    using the levenshtein distance metric.
-
-    Attributes:
-        labels (ndarray): Vector storing the labels of each data-point.
-        strings (list): List of strings for which the labels are provided.
-        num_classes (int): Number of classes/columns to match to.
-        column_index (dict): Dictionary mapping each column to its index.
-    """
-
-    def __init__(self):
-        """Initializes the classifier."""
-        pass
+class KNNClassifier(FeatureBox):
 
     def fit(self, data):
         """Store the strings and their corresponding labels.
