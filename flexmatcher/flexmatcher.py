@@ -27,6 +27,7 @@ class FlexMatcher(object):
         self.feature_boxes = {}
         self._init_data_featureboxes()
         self._init_header_featureboxes()
+        self._build_pipeline()
 
     def _init_data_featureboxes(self):
         # features based on words
@@ -42,7 +43,8 @@ class FlexMatcher(object):
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(analyzer='char_wb',
                                          ngram_range=(n_gram, n_gram)),
-                    return_probs=False)
+                    return_probs=False
+                )
         # TODO: features to be implemented
         # feature_boxes['char_dist'] = fbox.CharDistFeatureBox()
 
@@ -51,7 +53,8 @@ class FlexMatcher(object):
         self.feature_boxes['col_1w'] = \
             fbox.FeatureBoxWithCore(
                 core=CountVectorizer(analyzer=utils.columnAnalyzer),
-                uses_data=False
+                uses_data=False,
+                return_probs=False
             )
         # features based on characters
         for n_gram in range(3, 6):
@@ -59,7 +62,8 @@ class FlexMatcher(object):
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(analyzer='char_wb',
                                          ngram_range=(n_gram, n_gram)),
-                    uses_data=False
+                    uses_data=False,
+                    return_probs=False
                 )
         # TODO: features to be implemented
         # knn_clf = clf.KNNClassifier()
@@ -67,26 +71,26 @@ class FlexMatcher(object):
 
     def _build_pipeline(self):
         # building a feature union
-        transformers_list = []
+        transformer_list = []
         for box_name, box in self.feature_boxes.items():
             selector_key = 'data' if box.uses_data else 'name'
             selector_pl = Pipeline([
                 ('selector', utils.ItemSelector(key=selector_key)),
                 ('estimator', box)
             ])
-            transformers_list.append((box_name, selector_pl))
-        union = FeatureUnion(transformers_list=transformers_list)
+            transformer_list.append((box_name, selector_pl))
+        self.union = FeatureUnion(transformer_list=transformer_list)
         # building the entire pipeline
         self.pipeline = Pipeline([
-            ('union', union)
+            ('union', self.union),
             ('clf', LogisticRegression(class_weight='balanced'))
         ])
 
     def train(self, dataframes, mappings, sample_size=100):
         print('Creating Tranining Data ...')
-        self._transform_train_data()
-        self.pipeline.fit(self.train_data[['name', 'data']],
-                          self.train_data['label'])
+        self._transform_train_data(dataframes, mappings, sample_size)
+        self.pipeline.fit(self.training_data[['name', 'data']],
+                          self.training_data['label'])
 
     def _transform_train_data(self, dataframes, mappings, sample_size):
         all_column_names = []
@@ -121,7 +125,12 @@ class FlexMatcher(object):
     def predict(self, full_df, sample_size=100, predict_all=True):
         predict_data = self._transform_predict_data(full_df, sample_size)
         if predict_all:
-            return self.pipeline.predict(predict_data)
+            # convert the results into dictionary
+            result = dict(zip(predict_data['name'],
+                              self.pipeline.predict(predict_data)))
+            print(predict_data)
+            print(self.pipeline.predict_proba(predict_data))
+            return result
         else:
             munk = Munkres()
             likelihoods = self.pipeline.predict_proba(predict_data)

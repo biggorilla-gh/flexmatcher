@@ -10,7 +10,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 
@@ -37,7 +37,7 @@ class FeatureBox(BaseEstimator, ClassifierMixin):
             y (np.array): Numpy array of shape [n_samples] storing the labels
             associated with each data point.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def transform(self, X):
@@ -48,8 +48,14 @@ class FeatureBox(BaseEstimator, ClassifierMixin):
             X (np.array): Numpy array of shape [n_samples] storing the input
             data that should be transformed.
         """
-        pass
+        raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def uses_data(self):
-        pass
+        raise NotImplementedError
+
+    @uses_data.setter
+    @abstractmethod
+    def uses_data(self, val):
+        raise NotImplementedError

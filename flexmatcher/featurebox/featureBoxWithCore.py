@@ -89,7 +89,7 @@ class FeatureBoxWithCore(FeatureBox):
             (FeatureBoxWithCore): Returns the self object as required by sklearn
             guidelines.
         """
-        if self.use_data:
+        if self.uses_data:
             self._fit_data(X, y)
         else:
             self._fit_header(X, y)
@@ -145,7 +145,7 @@ class FeatureBoxWithCore(FeatureBox):
             (np.array): Numpy array of shape [n_samples, num_features] storing
             the resulting features computed for the input data.
         """
-        if self.use_data:
+        if self.uses_data:
             return self._transform_data(X)
         else:
             return self._transform_header(X)
@@ -174,8 +174,8 @@ class FeatureBoxWithCore(FeatureBox):
         # Combining features back together
         features = np.zeros((len(X), data_features.shape[1]))
         index = 0
-        for i in range(len(data_X)):
-            num_points = len(data_X[i])
+        for i in range(len(X)):
+            num_points = len(X[i])
             features[i] = np.mean(data_features[index:(index + num_points)],
                                   axis=0)
         return features
@@ -198,3 +198,11 @@ class FeatureBoxWithCore(FeatureBox):
             return self.clf.predict_proba(local_features)
         else:
             return self.core.transform(X)
+
+    @property
+    def uses_data(self):
+        return self._uses_data
+
+    @uses_data.setter
+    def uses_data(self, val):
+        self._uses_data = val
