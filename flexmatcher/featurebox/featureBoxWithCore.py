@@ -47,7 +47,7 @@ class FeatureBoxWithCore(FeatureBox):
     """
 
     def __init__(self, core=CountVectorizer(), uses_data=True,
-                 data_type='str', return_probs=False):
+                 data_type='str', return_probs=True):
         """Initialize the class object.
 
         Args:

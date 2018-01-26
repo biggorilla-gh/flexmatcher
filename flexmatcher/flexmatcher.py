@@ -37,21 +37,18 @@ class FlexMatcher(object):
         for n_gram in range(2):
             self.feature_boxes[str(n_gram) + 'w'] = \
                 fbox.FeatureBoxWithCore(
-                    core=CountVectorizer(ngram_range=(n_gram, n_gram)),
-                    return_probs=True
+                    core=CountVectorizer(ngram_range=(n_gram, n_gram))
                 )
         # features based on characters
         for n_gram in range(4):
             self.feature_boxes[str(n_gram) + 'c'] = \
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(analyzer='char_wb',
-                                         ngram_range=(n_gram, n_gram)),
-                    return_probs=True
+                                         ngram_range=(n_gram, n_gram))
                 )
         # features based on type of characters
         self.feature_boxes['c_dist'] = fbox.FeatureBoxWithCore(
-            core=core.CharDistCore(),
-            return_probs=True
+            core=core.CharDistCore()
         )
 
     def _init_header_featureboxes(self):
@@ -59,8 +56,7 @@ class FlexMatcher(object):
         self.feature_boxes['col_1w'] = \
             fbox.FeatureBoxWithCore(
                 core=CountVectorizer(analyzer=utils.columnAnalyzer),
-                uses_data=False,
-                return_probs=True
+                uses_data=False
             )
         # features based on characters
         for n_gram in range(3, 6):
@@ -68,16 +64,17 @@ class FlexMatcher(object):
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(analyzer='char_wb',
                                          ngram_range=(n_gram, n_gram)),
-                    uses_data=False,
-                    return_probs=True
+                    uses_data=False
                 )
         self.feature_boxes['col_c_dist'] = fbox.FeatureBoxWithCore(
             core=core.CharDistCore(),
-            uses_data=False,
-            return_probs=True
+            uses_data=False
         )
-        # TODO: features to be implemented
-        # knn_clf = clf.KNNClassifier()
+        self.feature_boxes['lev_clf'] = fbox.FeatureBoxWithCore(
+            core=core.LevenshteinCore(),
+            uses_data=False,
+            return_probs=False
+        )
 
     def _build_pipeline(self):
         # building a feature union
