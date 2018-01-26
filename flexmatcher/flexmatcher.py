@@ -128,8 +128,6 @@ class FlexMatcher(object):
             # convert the results into dictionary
             result = dict(zip(predict_data['name'],
                               self.pipeline.predict(predict_data)))
-            print(predict_data)
-            print(self.pipeline.predict_proba(predict_data))
             return result
         else:
             munk = Munkres()
