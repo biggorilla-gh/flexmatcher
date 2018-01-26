@@ -10,7 +10,7 @@ from __future__ import division
 
 import flexmatcher.featurebox as fbox
 import flexmatcher.utils as utils
-import flexmatcher.core as core
+import flexmatcher.featurebox.core as core
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -36,7 +36,7 @@ class FlexMatcher(object):
             self.feature_boxes[str(n_gram) + 'w'] = \
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(ngram_range=(n_gram, n_gram)),
-                    return_probs=False
+                    return_probs=True
                 )
         # features based on characters
         for n_gram in range(4):
@@ -44,12 +44,12 @@ class FlexMatcher(object):
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(analyzer='char_wb',
                                          ngram_range=(n_gram, n_gram)),
-                    return_probs=False
+                    return_probs=True
                 )
         # features based on type of characters
         self.feature_boxes['c_dist'] = fbox.FeatureBoxWithCore(
             core=core.CharDistCore(),
-            return_probs=False
+            return_probs=True
         )
 
     def _init_header_featureboxes(self):
@@ -58,7 +58,7 @@ class FlexMatcher(object):
             fbox.FeatureBoxWithCore(
                 core=CountVectorizer(analyzer=utils.columnAnalyzer),
                 uses_data=False,
-                return_probs=False
+                return_probs=True
             )
         # features based on characters
         for n_gram in range(3, 6):
@@ -67,12 +67,12 @@ class FlexMatcher(object):
                     core=CountVectorizer(analyzer='char_wb',
                                          ngram_range=(n_gram, n_gram)),
                     uses_data=False,
-                    return_probs=False
+                    return_probs=True
                 )
         self.feature_boxes['col_c_dist'] = fbox.FeatureBoxWithCore(
             core=core.CharDistCore(),
             uses_data=False,
-            return_probs=False
+            return_probs=True
         )
         # TODO: features to be implemented
         # knn_clf = clf.KNNClassifier()

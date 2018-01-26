@@ -4,14 +4,16 @@ from __future__ import division
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
+import numpy as np
+
 
 class CharDistCore(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
-        pass
+        return self
 
     def transform(self, X):
-        pass
+        return np.array([self._extract_features(x) for x in X])
 
     def _extract_features(self, str_):
         len_ = len(str_)

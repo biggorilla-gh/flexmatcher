@@ -14,6 +14,7 @@ from __future__ import division
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_predict
 
 from flexmatcher.featurebox import FeatureBox
 
@@ -38,6 +39,11 @@ class FeatureBoxWithCore(FeatureBox):
         clf (sk.logisticRegression): the logistic regression classifier that
         will be used if return_probs is True. This attribute will be None
         if return_probs is False.
+        transformed (boolean): specifies if it is the first time the transform
+        function is being called or not. When return_probs is true, the first
+        transformation provides a folder prediction (to avoid overfitting).
+        y (np.arary): numpy array storing the labels from the data fitted before
+        the first transformation.
     """
 
     def __init__(self, core=CountVectorizer(), uses_data=True,
@@ -74,6 +80,8 @@ class FeatureBoxWithCore(FeatureBox):
             self.clf = LogisticRegression(class_weight='balanced')
         else:
             self.clf = None
+        # no transformation yet!
+        self.transformed = False
 
     def fit(self, X, y=None):
         """Fit the parameters that are required for feature extraction based
@@ -93,6 +101,9 @@ class FeatureBoxWithCore(FeatureBox):
             self._fit_data(X, y)
         else:
             self._fit_header(X, y)
+        # storing the labels if not transformation is done yet
+        if not self.transformed:
+            self.y = y
         return self
 
     def _fit_data(self, X, y):
@@ -146,9 +157,11 @@ class FeatureBoxWithCore(FeatureBox):
             the resulting features computed for the input data.
         """
         if self.uses_data:
-            return self._transform_data(X)
+            result = self._transform_data(X)
         else:
-            return self._transform_header(X)
+            result = self._transform_header(X)
+        self.transformed = True
+        return result
 
     def _transform_data(self, X):
         """Transform the data listed under each column to obtain the resulting
@@ -168,7 +181,16 @@ class FeatureBoxWithCore(FeatureBox):
         if self.return_probs:
             # need to run the LR classifier and return the probabilities.
             local_features = self.core.transform(data_X)
-            data_features = self.clf.predict_proba(local_features)
+            if not self.transformed:
+                cv_clf = LogisticRegression(class_weight = 'balanced')
+                repeated_y = \
+                    [np.array([self.y[i]] * len(X[i])) for i in range(len(X))]
+                data_y = np.concatenate(repeated_y)
+                data_features = cross_val_predict(cv_clf, local_features,
+                                                  data_y,
+                                                  method='predict_proba', cv=2)
+            else:
+                data_features = self.clf.predict_proba(local_features)
         else:
             data_features = self.core.transform(data_X)
         # Combining features back together
@@ -178,6 +200,7 @@ class FeatureBoxWithCore(FeatureBox):
             num_points = len(X[i])
             features[i] = np.mean(data_features[index:(index + num_points)],
                                   axis=0)
+            index += num_points
         return features
 
     def _transform_header(self, X):
@@ -195,7 +218,13 @@ class FeatureBoxWithCore(FeatureBox):
         if self.return_probs:
             # need to run the LR classifier and return the probabilities.
             local_features = self.core.transform(X)
-            return self.clf.predict_proba(local_features)
+            if not self.transformed:
+                cv_clf = LogisticRegression(class_weight = 'balanced')
+                return cross_val_predict(cv_clf, local_features,
+                                         self.y, method='predict_proba',
+                                         cv=2)
+            else:
+                return self.clf.predict_proba(local_features)
         else:
             return self.core.transform(X)
 
