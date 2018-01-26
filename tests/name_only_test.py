@@ -34,9 +34,8 @@ class NameOnlyTest(unittest.TestCase):
         for ind in range(10):     # ind is the index to predict
             schemas = [x for i, x in enumerate(self.schema_list) if i != ind]
             mappings = [x for i, x in enumerate(self.mappings) if i != ind]
-            fm = flexmatcher.FlexMatcher(schemas,
-                                         mappings)
-            fm.train()
-            pred_mapping = fm.make_prediction(self.schema_list[ind])
+            fm = flexmatcher.FlexMatcher()
+            fm.train(schemas, mappings)
+            pred_mapping = fm.predict(self.schema_list[ind])
             for col in self.mappings[ind]:
                 self.assertEqual(pred_mapping[col], self.mappings[ind][col])

@@ -41,16 +41,16 @@ class SerializeTest(unittest.TestCase):
         # Using Flexmatcher
         schema_list = [self.data1, self.data2]
         mapping_list = [self.data1_mapping, self.data2_mapping]
-        fm = FlexMatcher(schema_list, mapping_list)
-        fm.train()
+        fm = FlexMatcher()
+        fm.train(schema_list, mapping_list)
         # storing the existing model
         fm.save_model('test.model')
         fm_loaded = FlexMatcher.load_model('test.model')
         # checking if the attributes match
         self.assertListEqual(fm.columns, fm_loaded.columns)
         # checking if the predictions match
-        orig_predicted_mapping = fm.make_prediction(self.data3)
-        new_predicted_mapping = fm_loaded.make_prediction(self.data3)
+        orig_predicted_mapping = fm.predict(self.data3)
+        new_predicted_mapping = fm_loaded.predict(self.data3)
         self.assertEqual(orig_predicted_mapping['rt'],
                          new_predicted_mapping['rt'])
         self.assertEqual(orig_predicted_mapping['yr'],
