@@ -46,8 +46,6 @@ class SerializeTest(unittest.TestCase):
         # storing the existing model
         fm.save_model('test.model')
         fm_loaded = FlexMatcher.load_model('test.model')
-        # checking if the attributes match
-        self.assertListEqual(fm.columns, fm_loaded.columns)
         # checking if the predictions match
         orig_predicted_mapping = fm.predict(self.data3)
         new_predicted_mapping = fm_loaded.predict(self.data3)
