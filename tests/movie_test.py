@@ -9,9 +9,9 @@ class MovieTest(unittest.TestCase):
     def setUp(self):
         # creating the first dataset
         vals1 = [['year', 'Movie', 'imdb_rating'],
-                 ['2001', 'Lord of the Rings', '8.8'],
-                 ['2010', 'Inception', '8.7'],
-                 ['1999', 'The Matrix', '8.7']]
+                 ['2001', 'Lord of the Rings', 8.8],
+                 ['2010', 'Inception', 8.7],
+                 ['1999', 'The Matrix', 8.7]]
         header = vals1.pop(0)
         self.data1 = pd.DataFrame(vals1, columns=header)
         self.data1_mapping = {'year': 'movie_year',
@@ -29,8 +29,8 @@ class MovieTest(unittest.TestCase):
                               'title': 'movie_name'}
         # creating the third dataset
         vals3 = [['rt', 'id', 'yr'],
-                 ['8.5', 'The Pianist', '2002'],
-                 ['7.7', 'The Social Network', '2010']]
+                 [8.5, 'The Pianist', '2002'],
+                 [7.7, 'The Social Network', '2010']]
         header = vals3.pop(0)
         self.data3 = pd.DataFrame(vals3, columns=header)
         self.data3_mapping = {'rt': 'movie_rating',
