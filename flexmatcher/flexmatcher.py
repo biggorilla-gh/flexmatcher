@@ -27,58 +27,58 @@ class FlexMatcher(object):
     def __init__(self):
         print('Setting up FlexMatcher ...')
         # setting up the set of default FeatureBoxes
-        self.feature_boxes = {}
+        self._feature_boxes = {}
         self._init_data_featureboxes()
         self._init_header_featureboxes()
-        self._build_pipeline()
+        self.build_pipeline()
 
     def _init_data_featureboxes(self):
         # features based on words
         for n_gram in range(2):
-            self.feature_boxes[str(n_gram) + 'w'] = \
+            self._feature_boxes[str(n_gram) + 'w'] = \
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(ngram_range=(n_gram, n_gram))
                 )
         # features based on characters
         for n_gram in range(4):
-            self.feature_boxes[str(n_gram) + 'c'] = \
+            self._feature_boxes[str(n_gram) + 'c'] = \
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(analyzer='char_wb',
                                          ngram_range=(n_gram, n_gram))
                 )
         # features based on type of characters
-        self.feature_boxes['c_dist'] = fbox.FeatureBoxWithCore(
+        self._feature_boxes['c_dist'] = fbox.FeatureBoxWithCore(
             core=core.CharDistCore()
         )
         # features based on the distribution of the numbers
-        self.feature_boxes['num_dist'] = fbox.NumericDistFeatureBox()
+        self._feature_boxes['num_dist'] = fbox.NumericDistFeatureBox()
 
     def _init_header_featureboxes(self):
         # features based on words
-        self.feature_boxes['col_1w'] = \
+        self._feature_boxes['col_1w'] = \
             fbox.FeatureBoxWithCore(
                 core=CountVectorizer(analyzer=utils.columnAnalyzer),
                 uses_data=False
             )
         # features based on characters
         for n_gram in range(3, 6):
-            self.feature_boxes['col_' + str(n_gram) + 'c'] = \
+            self._feature_boxes['col_' + str(n_gram) + 'c'] = \
                 fbox.FeatureBoxWithCore(
                     core=CountVectorizer(analyzer='char_wb',
                                          ngram_range=(n_gram, n_gram)),
                     uses_data=False
                 )
-        self.feature_boxes['col_c_dist'] = fbox.FeatureBoxWithCore(
+        self._feature_boxes['col_c_dist'] = fbox.FeatureBoxWithCore(
             core=core.CharDistCore(),
             uses_data=False
         )
-        self.feature_boxes['lev_clf'] = fbox.FeatureBoxWithCore(
+        self._feature_boxes['lev_clf'] = fbox.FeatureBoxWithCore(
             core=core.LevenshteinCore(),
             uses_data=False,
             return_probs=False
         )
 
-    def _build_pipeline(self):
+    def build_pipeline(self):
         # building a feature union
         transformer_list = []
         # adding the types of values as features
@@ -88,7 +88,7 @@ class FlexMatcher(object):
         ])
         transformer_list.append(('type_detector', type_detector_pl))
         # adding the feature boxes
-        for box_name, box in self.feature_boxes.items():
+        for box_name, box in self._feature_boxes.items():
             selector_key = 'data' if box.uses_data else 'name'
             selector_pl = Pipeline([
                 ('selector', utils.ItemSelector(key=selector_key)),
@@ -172,6 +172,17 @@ class FlexMatcher(object):
         predict_data = pd.DataFrame({'name': df_column_names,
                                      'data': df_column_data})
         return predict_data
+
+    def add_featurebox(self, name, featurebox):
+        # TODO: test to see if it is a valid featurebox
+        self._feature_boxes[name] = featurebox
+
+    def remove_featurebox(self, name):
+        self._feature_boxes.pop(name, None)
+        # TODO: issue a warning if the previous value is None
+
+    def get_featureboxes(self):
+        return self._feature_boxes
 
     def save_model(self, output_file):
         """Serializes the FlexMatcher object into a model file using python's
