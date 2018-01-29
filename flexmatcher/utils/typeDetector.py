@@ -102,10 +102,28 @@ class TypeDetector(BaseEstimator, TransformerMixin):
             return 0, None
 
     @classmethod
-    def str_to_cat(cls, value_list):
+    def str_to_cat(cls, values):
         # just counting the number of unique values
-        num_categories = len(set(value_list))
-        if len(value_list) / num_categories > cls.category_min_support:
-            return 1, value_list
+        num_categories = len(set(values))
+        if len(values) / num_categories > cls.category_min_support:
+            return 1, values
         else:
             return 0, None
+
+    @classmethod
+    def all_to_str(cls, values):
+        # just counting the number of unique values
+        return [str(x) for x in values]
+
+    @classmethod
+    def type_as_list(cls, one_hot_types):
+        types = ['str']
+        if one_hot_types[1] == 1:
+            types.append('int')
+        if one_hot_types[2] == 1:
+            types.append('float')
+        if one_hot_types[3] == 1:
+            types.append('bool')
+        if one_hot_types[4] == 1:
+            types.append('cat')
+        return types
