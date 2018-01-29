@@ -17,6 +17,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_predict
 
 from flexmatcher.featurebox import FeatureBox
+from flexmatcher.utils import TypeDetector
 
 
 class FeatureBoxWithCore(FeatureBox):
@@ -98,6 +99,9 @@ class FeatureBoxWithCore(FeatureBox):
             guidelines.
         """
         if self.uses_data:
+            # transforming to the correct type
+            X = np.array([TypeDetector.transform_to_type(x, self.data_type)
+                          for x in X])
             self._fit_data(X, y)
         else:
             self._fit_header(X, y)
@@ -157,6 +161,9 @@ class FeatureBoxWithCore(FeatureBox):
             the resulting features computed for the input data.
         """
         if self.uses_data:
+            # transforming to the correct type
+            X = np.array([TypeDetector.transform_to_type(x, self.data_type)
+                          for x in X])
             result = self._transform_data(X)
         else:
             result = self._transform_header(X)

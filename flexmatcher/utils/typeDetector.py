@@ -38,6 +38,20 @@ class TypeDetector(BaseEstimator, TransformerMixin):
         return [is_str, is_int, is_float, is_bool, is_cat]
 
     @classmethod
+    def transform_to_type(cls, values, type_):
+        if type_ == 'str':
+            _, result = cls.make_str(values)
+        elif type == 'int':
+            _, result = cls.make_int(values)
+        elif type == 'float':
+            _, result = cls.make_float(values)
+        elif type == 'bool':
+            _, result = cls.make_bool(values)
+        elif type == 'cat':
+            _, result = cls.make_cat(values)
+        return result
+
+    @classmethod
     def make_int(cls, values):
         _, values = cls.make_str(values)
         # try converting the values (invalid values are replaced with 0)
