@@ -182,7 +182,7 @@ class FeatureBoxWithCore(FeatureBox):
             # need to run the LR classifier and return the probabilities.
             local_features = self.core.transform(data_X)
             if not self.transformed:
-                cv_clf = LogisticRegression(class_weight = 'balanced')
+                cv_clf = LogisticRegression(class_weight='balanced')
                 repeated_y = \
                     [np.array([self.y[i]] * len(X[i])) for i in range(len(X))]
                 data_y = np.concatenate(repeated_y)
@@ -219,7 +219,7 @@ class FeatureBoxWithCore(FeatureBox):
             # need to run the LR classifier and return the probabilities.
             local_features = self.core.transform(X)
             if not self.transformed:
-                cv_clf = LogisticRegression(class_weight = 'balanced')
+                cv_clf = LogisticRegression(class_weight='balanced')
                 return cross_val_predict(cv_clf, local_features,
                                          self.y, method='predict_proba',
                                          cv=2)
@@ -235,3 +235,11 @@ class FeatureBoxWithCore(FeatureBox):
     @uses_data.setter
     def uses_data(self, val):
         self._uses_data = val
+
+    @property
+    def data_type(self):
+        return self._data_type
+
+    @data_type.setter
+    def data_type(self, val):
+        self._data_type = val

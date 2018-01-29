@@ -22,6 +22,8 @@ class FeatureBox(BaseEstimator, TransformerMixin):
     Attributes:
         uses_data(boolean): specifies if the features are extracted using the
         data under each column (if True) or using the column names (if False).
+        data_type(str): a string that specifies the type of the column. There
+        are 5 possible values for this: str, int, float, bool, cat
     """
 
     __metaclass__ = ABCMeta
@@ -58,4 +60,14 @@ class FeatureBox(BaseEstimator, TransformerMixin):
     @uses_data.setter
     @abstractmethod
     def uses_data(self, val):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def data_type(self):
+        raise NotImplementedError
+
+    @data_type.setter
+    @abstractmethod
+    def data_type(self, val):
         raise NotImplementedError
