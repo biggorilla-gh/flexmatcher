@@ -79,6 +79,13 @@ class FlexMatcher(object):
     def _build_pipeline(self):
         # building a feature union
         transformer_list = []
+        # adding the types of values as features
+        type_detector_pl = Pipeline([
+            ('selector', utils.ItemSelector(key='data')),
+            ('estimator', utils.TypeDetector())
+        ])
+        transformer_list.append(('type_detector', type_detector_pl))
+        # adding the feature boxes
         for box_name, box in self.feature_boxes.items():
             selector_key = 'data' if box.uses_data else 'name'
             selector_pl = Pipeline([
@@ -101,8 +108,10 @@ class FlexMatcher(object):
 
     def _transform_train_data(self, dataframes, mappings, sample_size):
         all_column_names = []
+        all_column_types = []
         all_column_data = []
         all_column_lables = []
+        td = utils.TypeDetector()
         for (full_df, map_) in zip(dataframes, mappings):
             if sample_size > full_df.shape[0]:
                 # TODO: issue a warning
@@ -111,6 +120,7 @@ class FlexMatcher(object):
                 df = full_df.sample(sample_size)
             df_column_names = list(df.columns)
             df_column_data = [list(df.iloc[:, i]) for i in range(len(list(df)))]
+            df_column_types = [td._extract_types(x) for x in df_column_data]
             df_column_labels = []
             for col in df_column_names:
                 try:
@@ -121,10 +131,12 @@ class FlexMatcher(object):
             # appending the extracted results
             all_column_names += df_column_names
             all_column_data += df_column_data
+            all_column_types += df_column_types
             all_column_lables += df_column_labels
         # creating final training data based on these
         self.training_data = pd.DataFrame({'name': all_column_names,
                                            'data': all_column_data,
+                                           'types': all_column_types,
                                            'label': all_column_lables})
         self.num_sources = len(dataframes)
         self.labels = list(set(all_column_lables))

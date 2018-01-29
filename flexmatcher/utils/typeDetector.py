@@ -17,9 +17,9 @@ class TypeDetector(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X):
-        return np.array([self._extract_features(x) for x in X])
+        return np.array([self._extract_types(x) for x in X])
 
-    def _extract_features(self, value_list):
+    def _extract_types(self, value_list):
         is_str = 1  # we can make an string out of everything
         is_int, is_float, is_bool, is_cat = 0, 0, 0, 0
         values = pd.Series(value_list)
@@ -116,14 +116,14 @@ class TypeDetector(BaseEstimator, TransformerMixin):
         return [str(x) for x in values]
 
     @classmethod
-    def type_as_list(cls, one_hot_types):
-        types = ['str']
-        if one_hot_types[1] == 1:
-            types.append('int')
-        if one_hot_types[2] == 1:
-            types.append('float')
-        if one_hot_types[3] == 1:
-            types.append('bool')
-        if one_hot_types[4] == 1:
-            types.append('cat')
-        return types
+    def has_type(cls, type_, one_hot_types):
+        if type_ == 'str':
+            return one_hot_types[0] == 1
+        elif type_ == 'int':
+            return one_hot_types[1] == 1
+        elif type_ == 'float':
+            return one_hot_types[2] == 1
+        elif type_ == 'bool':
+            return one_hot_types[3] == 1
+        elif type_ == 'cat':
+            return one_hot_types[4] == 1
