@@ -41,13 +41,13 @@ class TypeDetector(BaseEstimator, TransformerMixin):
     def transform_to_type(cls, values, type_):
         if type_ == 'str':
             _, result = cls.make_str(values)
-        elif type == 'int':
+        elif type_ == 'int':
             _, result = cls.make_int(values)
-        elif type == 'float':
+        elif type_ == 'float':
             _, result = cls.make_float(values)
-        elif type == 'bool':
+        elif type_ == 'bool':
             _, result = cls.make_bool(values)
-        elif type == 'cat':
+        elif type_ == 'cat':
             _, result = cls.make_cat(values)
         return result
 

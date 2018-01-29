@@ -50,6 +50,8 @@ class FlexMatcher(object):
         self.feature_boxes['c_dist'] = fbox.FeatureBoxWithCore(
             core=core.CharDistCore()
         )
+        # features based on the distribution of the numbers
+        self.feature_boxes['num_dist'] = fbox.NumericDistFeatureBox()
 
     def _init_header_featureboxes(self):
         # features based on words
