@@ -31,10 +31,10 @@ class TypeDetector(BaseEstimator, TransformerMixin):
         elif str(values.dtype).startswith('bool'):
             is_bool = True
         else:  # the type is object and values have a mixture of types
-            is_int, _ = self.str_to_int(values)
-            is_float, _ = self.str_to_float(values)
-            is_bool, _ = self.str_to_bool(values)
-            is_cat, _ = self.str_to_cat(values)
+            is_int, _ = self.make_int(values)
+            is_float, _ = self.make_float(values)
+            is_bool, _ = self.make_bool(values)
+            is_cat, _ = self.make_cat(values)
         return [is_str, is_int, is_float, is_bool, is_cat]
 
     @classmethod
