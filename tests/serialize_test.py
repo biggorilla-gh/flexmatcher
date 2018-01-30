@@ -41,7 +41,7 @@ class SerializeTest(unittest.TestCase):
         # Using Flexmatcher
         schema_list = [self.data1, self.data2]
         mapping_list = [self.data1_mapping, self.data2_mapping]
-        fm = FlexMatcher()
+        fm = FlexMatcher(1, 1)
         fm.train(schema_list, mapping_list)
         # storing the existing model
         fm.save_model('test.model')

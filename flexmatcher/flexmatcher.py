@@ -24,13 +24,14 @@ import os
 
 class FlexMatcher(object):
 
-    def __init__(self):
+    def __init__(self, num_headers_required=5, num_datapoints_required=50):
         print('Setting up FlexMatcher ...')
         # setting up the set of default FeatureBoxes
         self._feature_boxes = {}
         self._init_data_featureboxes()
         self._init_header_featureboxes()
-        self.build_pipeline()
+        self.num_headers_required = num_headers_required
+        self.num_datapoints_required = num_datapoints_required
 
     def _init_data_featureboxes(self):
         # features based on words
@@ -78,7 +79,13 @@ class FlexMatcher(object):
             return_probs=False
         )
 
-    def build_pipeline(self):
+    def _build_pipeline(self, dataframes):
+        # deciding which featureboxes to add
+        enough_headers = len(dataframes) >= self.num_headers_required
+        data_available = 0
+        for df in dataframes:
+            data_available += len(df)
+        enough_data = data_available >= self.num_datapoints_required
         # building a feature union
         transformer_list = []
         # adding the types of values as features
@@ -89,6 +96,10 @@ class FlexMatcher(object):
         transformer_list.append(('type_detector', type_detector_pl))
         # adding the feature boxes
         for box_name, box in self._feature_boxes.items():
+            if box.uses_data and not enough_data:
+                continue
+            elif not box.uses_data and not enough_headers:
+                continue
             selector_key = 'data' if box.uses_data else 'name'
             selector_pl = Pipeline([
                 ('selector', utils.ItemSelector(key=selector_key)),
@@ -105,6 +116,7 @@ class FlexMatcher(object):
     def train(self, dataframes, mappings, sample_size=100):
         print('Creating Tranining Data ...')
         self._transform_train_data(dataframes, mappings, sample_size)
+        self._build_pipeline(dataframes)
         self.pipeline.fit(self.training_data[['name', 'data']],
                           self.training_data['label'])
 

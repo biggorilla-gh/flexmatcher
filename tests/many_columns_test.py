@@ -26,7 +26,7 @@ class ManyColumnsTest(unittest.TestCase):
         # Using Flexmatcher
         schema_list = [self.data1, self.data1]
         mapping_list = [self.data1_mapping, self.data1_mapping]
-        fm = flexmatcher.FlexMatcher()
+        fm = flexmatcher.FlexMatcher(1, 1)
         fm.train(schema_list, mapping_list)
         predicted_mapping = fm.predict(self.data1)
         for i in range(10):

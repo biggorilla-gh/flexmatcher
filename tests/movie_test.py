@@ -41,7 +41,7 @@ class MovieTest(unittest.TestCase):
         # Using Flexmatcher
         schema_list = [self.data1, self.data2]
         mapping_list = [self.data1_mapping, self.data2_mapping]
-        fm = flexmatcher.FlexMatcher()
+        fm = flexmatcher.FlexMatcher(1, 1)
         fm.train(schema_list, mapping_list)
         predicted_mapping = fm.predict(self.data3)
         self.assertEqual(predicted_mapping['rt'], 'movie_rating')
