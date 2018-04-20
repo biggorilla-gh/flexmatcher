@@ -164,7 +164,7 @@ class FlexMatcher(object):
             return result
         else:
             munk = Munkres()
-            likelihoods = self.pipeline.predict_proba(predict_data)
+            likelihoods = (-self.pipeline.predict_proba(predict_data)).tolist()
             indexes = munk.compute(likelihoods)
             predicted_mapping = {}
             for (row, col) in indexes:
