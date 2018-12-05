@@ -184,7 +184,7 @@ class FlexMatcher(object):
         regression_data = self.train_data[['class']].copy()
         # adding the prediction probability from classifiers
         for classifier_ind, prediction in enumerate(self.prediction_list):
-            classifier_name = 'classifer' + str(classifier_ind)
+            classifier_name = 'classifer' + str(classifier_ind) + '_'
             column_names = [classifier_name + x for x in self.columns]
             for c in column_names:
                 regression_data[c] = None
@@ -223,7 +223,7 @@ class FlexMatcher(object):
                 elif self.classifier_type[clf_ind] == 'column':
                     raw_prediction = clf_inst.predict(column_name)
                 # applying the weights to each class in the raw prediction
-                classifier_name = 'classifier' + str(clf_ind)
+                classifier_name = 'classifier' + str(clf_ind) + '_'
                 column_names = [classifier_name + x for x in self.columns]
                 curr_dat = pd.DataFrame(raw_prediction, columns=column_names)
                 regression_data = pd.concat([regression_data, curr_dat],
